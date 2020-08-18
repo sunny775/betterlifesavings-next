@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
+import { useRouter } from "next/router";
 import { app } from "../config/firebase";
 import { successNotice } from "../utils/alerts/userUpdate.success";
 
 function useGetUser() {
+  const router = useRouter();
   const [data, setData] = useState(null);
   const [userDetails, setUserDetails] = useState(null);
   const [error, setError] = useState(null);
@@ -12,17 +14,13 @@ function useGetUser() {
   const [file, setFile] = useState(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState("");
   const [showPreview, setShowPreview] = useState(false);
+  const [detailsUpdated, setDetailsUpdated] = useState(false);
 
   const { auth, db, storageRef } = app;
   const user = auth.currentUser;
 
   useEffect(() => {
     const unregisterAuthObserver = auth.onAuthStateChanged(function (user) {
-      /*const data = user || {};
-      setData({ isAuth: !!user, ...data });
-      !user && setUserDetails({});
-      newUser && setUserDetails({});*/
-
       if (user) {
         console.log(user);
         const { uid, phoneNumber } = user;
@@ -38,7 +36,7 @@ function useGetUser() {
             { merge: true }
           )
           .then(function () {
-           console.log('login successful!');
+            console.log("login successful!");
           })
           .catch(function (error) {
             console.log(error);
@@ -59,7 +57,9 @@ function useGetUser() {
           .collection("users")
           .doc(data.uid)
           .onSnapshot(function (doc) {
-            setUserDetails(doc.data());
+            const data = doc.data();
+            setUserDetails(data);
+            data && setDetailsUpdated(!!data.username);
             console.log("Current data: ", doc.data());
             console.log("user:", data);
             console.log("details:", userDetails);
@@ -88,8 +88,7 @@ function useGetUser() {
     if (user) {
       setDetailLoading(true);
       try {
-        const doc = db
-          .collection("users")
+        db.collection("users")
           .doc(user.uid)
           .set(
             {
@@ -104,13 +103,9 @@ function useGetUser() {
               })
               .then(function () {
                 setDetailLoading(false);
-                successNotice(
-                  "Profile details successfully updated. You can now return to account page"
-                );
-                return doc;
+                router.push("/account");
               });
           });
-        return doc;
       } catch (error) {
         setError(error);
         console.log(error);
@@ -173,8 +168,8 @@ function useGetUser() {
     auth
       .signOut()
       .then(function () {
-        setData({ isAuth: !!user });
-        setUserDetails({});
+        setData(null);
+        setUserDetails(null);
         console.log("sign out successful");
       })
       .catch(function (error) {
@@ -184,6 +179,7 @@ function useGetUser() {
   return {
     data,
     userDetails,
+    detailsUpdated,
     newUser,
     detailLoading,
     dpLoading,

@@ -59,6 +59,11 @@ color: white;
   text-decoration: none;
 }
 `
+const A = styled.a`
+img:hover {
+  box-shadow: 0 0 2px 10px rgba(0, 140, 186, 0.5);
+}
+`
 
 const Main = () => (
   <Section className="col-md-9">

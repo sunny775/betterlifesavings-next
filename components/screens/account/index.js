@@ -3,11 +3,12 @@ import { Card, Col, Button, Table, Badge } from "react-bootstrap";
 import styled from "styled-components";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
-import { useRouter } from 'next/router'
+import { useRouter } from "next/router";
 import DepositModal from "../../../components/transaction-request/DepositModal";
 import WithdrawalModal from "../../../components/transaction-request/WithdrawalModal";
 import useAuth from "../../../hooks/auth";
 import useTransactions from "../../../hooks/transactions";
+import {fadeIn, fadeInWithDelay} from '../../../components/animations'
 
 const formatDate = (iso) => {
   var options = { year: "numeric", month: "short", day: "numeric" };
@@ -19,7 +20,29 @@ const formatDate = (iso) => {
   };
 };
 
+const CompleteProfile = styled.div`
+  display: ${(props) => (props.updated ? "block" : "none")};
+`;
+
+const IncompleteProfile = styled.div`
+  position: static;
+  top: 50vh;
+  margin: auto;
+  display: ${(props) => (props.updated ? "none" : "block")};
+  animation: ${fadeInWithDelay} 4s linear;
+  transition: all 0.3s ease-in;
+`;
+const Loading = styled.div`
+  position: fixed;
+  top: 50vh;
+  margin: auto;
+  font-size: 2em;
+`;
+
+
 const Acct = styled.div`
+animation: ${fadeIn} 1s ease-out;
+  transition: all 0.3s ease-in;
   width: 100%;
   background: rgba(0, 255, 0, 0.04);
   margin-top: 100px !important;
@@ -114,6 +137,17 @@ const Balance = styled(Col)`
   border-radius: 15px;
   font-weight: bold;
 `;
+const Container = styled.div`
+  min-height: 100vh;
+  width: 100vw;
+  padding: 0;
+  margin:0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+`;
 
 const Account = () => {
   const {
@@ -127,11 +161,10 @@ const Account = () => {
     postTransaction,
     transLoading,
   } = useTransactions();
-  const { data, userDetails, signOut } = useAuth();
+  const { data, userDetails, detailsUpdated, signOut } = useAuth();
   const router = useRouter();
 
-  data && !data.isAuth && router.push('/sign-in');
-  //userDetails && userDetails.role && !userDetails.dob && router.push('/settings/edit-profile');
+  data && !data.isAuth && router.push("/sign-in");
 
   const getTransactions = () => {
     if (userTransactions.length) {
@@ -164,118 +197,125 @@ const Account = () => {
   };
 
   return (
-    <div style={{ width: "100vw" }}>
-      <DepositModal
-        open={depositOpen}
-        close={hideDeposit}
-        userDetails={userDetails}
-        postTransaction={postTransaction}
-        transLoading={transLoading}
-      />
-      <WithdrawalModal
-        open={withdrawalOpen}
-        close={hideWithdrawal}
-        userDetails={userDetails}
-        postTransaction={postTransaction}
-        transLoading={transLoading}
-      />
-      <Acct className="row">
-        <Col md={3}>
-          <Profile>
-            {userDetails && (
-              <Card.Body>
-                {userDetails.url ? (
-                  <WhenUser url={userDetails.url}>
-                    <Link
-                      href={`/settings/edit-profile`}
-                    >
-                      <a>
-                        {" "}
-                        <FontAwesomeIcon icon="pencil-alt" color="bue" />
-                      </a>
-                    </Link>
-                  </WhenUser>
-                ) : (
-                  <Div>
-                    <Link
-                      href={`/settings/edit-profile`}
-                    >
-                      <a>
-                        <FontAwesomeIcon icon="pencil-alt" color="grey" />
-                      </a>
-                    </Link>
-                  </Div>
-                )}
+    <Container style={{ width: "100vw" }}>
+      {!data && <Loading>Loading...</Loading>}
+      <IncompleteProfile updated={detailsUpdated}>
+        <Link href="/settings/edit-profile">
+          <a>
+            Welcome to BetterLife Micro-Savings International Company Limited.
+            Proceed to complete your registration &#8594;
+          </a>
+        </Link>
+      </IncompleteProfile>
+      <CompleteProfile updated={detailsUpdated}>
+        <DepositModal
+          open={depositOpen}
+          close={hideDeposit}
+          userDetails={userDetails}
+          postTransaction={postTransaction}
+          transLoading={transLoading}
+        />
+        <WithdrawalModal
+          open={withdrawalOpen}
+          close={hideWithdrawal}
+          userDetails={userDetails}
+          postTransaction={postTransaction}
+          transLoading={transLoading}
+        />
+        <Acct className="row">
+          <Col md={3}>
+            <Profile>
+              {userDetails && (
+                <Card.Body>
+                  {userDetails.url ? (
+                    <WhenUser url={userDetails.url}>
+                      <Link href={`/settings/edit-profile`}>
+                        <a>
+                          {" "}
+                          <FontAwesomeIcon icon="pencil-alt" color="bue" />
+                        </a>
+                      </Link>
+                    </WhenUser>
+                  ) : (
+                    <Div>
+                      <Link href={`/settings/edit-profile`}>
+                        <a>
+                          <FontAwesomeIcon icon="pencil-alt" color="grey" />
+                        </a>
+                      </Link>
+                    </Div>
+                  )}
 
-                <Text className=" top mt-3">
-                  {userDetails.displayName || ""}
-                </Text>
-                <Text className=" top">{userDetails.email || ""}</Text>
-                <Text className=" top">{userDetails.state || ""}</Text>
-                <Edit>
-                  <Button variant="default" size="sm">
-                    <Link
-                      href={`/settings/edit-profile`}
-                    >
-                      <a>
-                        <small>Edit Profile</small>
-                      </a>
-                    </Link>
-                    <span className="ml-2">
-                      <FontAwesomeIcon icon="edit" color="grey" />
-                    </span>
-                  </Button>
-                </Edit>
-                <br />
-                <Text onClick={() => openDeposit()}>Deposit fund</Text>
-                <Text onClick={() => openWithdrawal()}>Widthdraw fund</Text>
-                <Text>Get support</Text>
-                <Text onClick={() => signOut()}>Logout</Text>
-              </Card.Body>
-            )}
-          </Profile>
-        </Col>
+                  <Text className=" top mt-3">
+                    {userDetails.displayName || ""}
+                  </Text>
+                  <Text className=" top">{userDetails.email || ""}</Text>
+                  <Text className=" top">{userDetails.state || ""}</Text>
+                  <Edit>
+                    <Button variant="default" size="sm">
+                      <Link href={`/settings/edit-profile`}>
+                        <a>
+                          <small>Edit Profile</small>
+                        </a>
+                      </Link>
+                      <span className="ml-2">
+                        <FontAwesomeIcon icon="edit" color="grey" />
+                      </span>
+                    </Button>
+                  </Edit>
+                  <br />
+                  <Text onClick={() => openDeposit()}>Deposit fund</Text>
+                  <Text onClick={() => openWithdrawal()}>Widthdraw fund</Text>
+                  <Text>Get support</Text>
+                  <Text onClick={() => signOut()}>Logout</Text>
+                </Card.Body>
+              )}
+            </Profile>
+          </Col>
 
-        <Col md={9}>
-          <Header>
-            {userDetails && (
+          <Col md={9}>
+            <Header>
+              {userDetails && (
+                <Card.Body>
+                  <Card.Title className="text-center text-primary">
+                    <strong>DASHBOARD</strong>
+                  </Card.Title>
+                  <div className="text-left row m-2">
+                    <Col sm={6}>ACCOUNT NUMBER:</Col>
+                    <Balance sm={6}>{userDetails.phoneNumber || ""}</Balance>
+                  </div>
+                  <div className="text-left row m-2">
+                    <Col sm={6}>BALANCE:</Col>
+                    <Balance sm={6}>
+                      ₦{userDetails.accountBalance || 0.0}
+                    </Balance>
+                  </div>
+                </Card.Body>
+              )}
+            </Header>
+            <Transactions>
               <Card.Body>
                 <Card.Title className="text-center text-primary">
-                  <strong>DASHBOARD</strong>
+                  <strong>Transaction History</strong>
                 </Card.Title>
-                <div className="text-left row m-2">
-                  <Col sm={6}>ACCOUNT NUMBER:</Col>
-                  <Balance sm={6}>{userDetails.phoneNumber || ""}</Balance>
-                </div>
-                <div className="text-left row m-2">
-                  <Col sm={6}>BALANCE:</Col>
-                  <Balance sm={6}>₦{userDetails.accountBalance || 0.0}</Balance>
-                </div>
+                <Table responsive>
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Type</th>
+                      <th>Date</th>
+                      <th>Amount</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>{getTransactions()}</tbody>
+                </Table>
               </Card.Body>
-            )}
-          </Header>
-          <Transactions>
-            <Card.Body>
-              <Card.Title className="text-center text-primary">
-                <strong>Transaction History</strong>
-              </Card.Title>
-              <Table responsive>
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>Type</th>
-                    <th>Date</th>
-                    <th>Amount</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>{getTransactions()}</tbody>
-              </Table>
-            </Card.Body>
-          </Transactions>
-        </Col>
-      </Acct>
-    </div>
+            </Transactions>
+          </Col>
+        </Acct>
+      </CompleteProfile>
+    </Container>
   );
 };
 export default Account;
