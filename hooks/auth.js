@@ -77,7 +77,7 @@ function useGetUser() {
 
   const hidePreview = () => setShowPreview(false);
   const openPreview = () => setShowPreview(true);
-
+  
   const selectUserPhoto = (options) => {
     setFile(options.file);
     setImagePreviewUrl(options.imagePreviewUrl);

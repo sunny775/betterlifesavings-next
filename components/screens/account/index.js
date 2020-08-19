@@ -4,11 +4,12 @@ import styled from "styled-components";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import DepositModal from "../../../components/transaction-request/DepositModal";
-import WithdrawalModal from "../../../components/transaction-request/WithdrawalModal";
+import DepositModal from "../../transaction-request/DepositModal";
+import WithdrawalModal from "../../transaction-request/WithdrawalModal";
 import useAuth from "../../../hooks/auth";
 import useTransactions from "../../../hooks/transactions";
-import {fadeIn, fadeInWithDelay} from '../../../components/animations'
+import { fadeIn, fadeInWithDelay } from "../../animations";
+import Plan from "./Plan";
 
 const formatDate = (iso) => {
   var options = { year: "numeric", month: "short", day: "numeric" };
@@ -39,9 +40,8 @@ const Loading = styled.div`
   font-size: 2em;
 `;
 
-
 const Acct = styled.div`
-animation: ${fadeIn} 1s ease-out;
+  animation: ${fadeIn} 1s ease-out;
   transition: all 0.3s ease-in;
   width: 100%;
   background: rgba(0, 255, 0, 0.04);
@@ -141,7 +141,7 @@ const Container = styled.div`
   min-height: 100vh;
   width: 100vw;
   padding: 0;
-  margin:0;
+  margin: 0;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -160,6 +160,10 @@ const Account = () => {
     userTransactions,
     postTransaction,
     transLoading,
+    setPlan,
+    planOpen,
+    hidePlan,
+    openPlan,
   } = useTransactions();
   const { data, userDetails, detailsUpdated, signOut } = useAuth();
   const router = useRouter();
@@ -208,6 +212,12 @@ const Account = () => {
         </Link>
       </IncompleteProfile>
       <CompleteProfile updated={detailsUpdated}>
+        <Plan
+          open={planOpen}
+          close={hidePlan}
+          setPlan={setPlan}
+          loading={transLoading}
+        />
         <DepositModal
           open={depositOpen}
           close={hideDeposit}
@@ -289,6 +299,16 @@ const Account = () => {
                     <Balance sm={6}>
                       ₦{userDetails.accountBalance || 0.0}
                     </Balance>
+                  </div>
+                  <div className="text-left row m-2">
+                    <Col sm={6}>SAVINGS PLAN:</Col>
+                    {userDetails.plan ? (
+                      <Balance sm={6}>{userDetails.plan}</Balance>
+                    ) : (
+                      <Button size='sm' onClick={() => openPlan()}>
+                        Select a Savings Plan
+                      </Button>
+                    )}
                   </div>
                 </Card.Body>
               )}

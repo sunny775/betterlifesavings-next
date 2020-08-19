@@ -40,7 +40,7 @@ class MyDocument extends Document {
         <body>
           <Main />
           <NextScript />
-          {/*<script type="text/javascript" src='/tawk.js'></script>*/}
+          <script type="text/javascript" src='/tawk.js'></script>
         </body>
       </Html>
     )

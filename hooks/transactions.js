@@ -7,6 +7,7 @@ function useTransactions() {
   const [depositOpen, setDepositOpen] = useState(false);
   const [transLoading, setTransLoading] = useState(false);
   const [withdrawalOpen, setWithdrawalOpen] = useState(false);
+  const [planOpen, setPlanOpen] = useState(null);
 
   const { auth, db } = app;
   const user = auth.currentUser;
@@ -29,6 +30,8 @@ function useTransactions() {
     }
   }, [db, user]);
 
+  const hidePlan = () => setPlanOpen(false);
+  const openPlan = () => setPlanOpen(true);
   const hideDeposit = () => setDepositOpen(false);
   const openDeposit = () => setDepositOpen(true);
   const hideWithdrawal = () => setWithdrawalOpen(false);
@@ -70,6 +73,30 @@ function useTransactions() {
     }
   };
 
+  const setPlan = async (plan) => {
+    if (user) {
+      setTransLoading(true);
+      try {
+        db.collection("users")
+          .doc(user.uid)
+          .set(
+            {
+              plan,
+            },
+            { merge: true }
+          )
+          .then(() => {
+            setTransLoading(false);
+            hidePlan();
+          });
+      } catch (error) {
+        console.log(error);
+        return error;
+      }
+    }
+  };
+
+
   return {
     userTransactions,
     postTransaction,
@@ -80,6 +107,10 @@ function useTransactions() {
     withdrawalOpen,
     hideWithdrawal,
     openWithdrawal,
+    setPlan,
+    planOpen,
+    hidePlan,
+    openPlan
   };
 }
 
