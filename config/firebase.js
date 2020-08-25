@@ -37,10 +37,10 @@ export const uiConfig = () => ({
       defaultCountry: 'NG'
     },
   ],
-  tosUrl: "https://betterlifesavings.vercel.app/#privacy-policy",
+  tosUrl: "https://betterlifesavings-next.vercel.app/policy",
   privacyPolicyUrl: function () {
     window.location.assign(
-      "https://betterlifesavings.vercel.app/#privacy-policy"
+      "https://betterlifesavings-next.vercel.app/policy"
     );
   },
   credentialHelper: "none",

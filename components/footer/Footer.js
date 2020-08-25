@@ -152,7 +152,7 @@ export default () => {
               <Link href="/blog"><NavLink>Blog</NavLink></Link>
             </H4>
             <H4 className="display-4">
-              <Link href="/privacy-policy"><NavLink>Privacy Policy</NavLink></Link>
+              <Link href="/policy"><NavLink>Privacy Policy</NavLink></Link>
             </H4>
           </div>
         </div>

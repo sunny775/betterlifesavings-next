@@ -6,7 +6,6 @@ const PolicyDesc = styled.div`
     margin: 2rem auto;
     margin-top: 150px;
     max-width: 80%;
-    color: #fff;
 `;
 
 const PolicyTerms = () => (
