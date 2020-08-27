@@ -53,10 +53,7 @@ function useTransactions() {
           owner: owner.uid,
           date: new Date().toISOString(),
           ownerDetails: {
-            name: owner.displayName,
-            address: owner.address1,
-            city: owner.city,
-            state: owner.state,
+            ...owner
           },
         })
         .then(function () {
