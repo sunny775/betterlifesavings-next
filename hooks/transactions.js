@@ -51,7 +51,11 @@ function useTransactions() {
         .add({
           ...details,
           owner: owner.uid,
-          date: new Date().toISOString()
+          date: new Date().toISOString(),
+          ownerDetails: {
+            name: owner.displayName,
+            location: owner.city
+          }
         })
         .then(function () {
           setTransLoading(false);
